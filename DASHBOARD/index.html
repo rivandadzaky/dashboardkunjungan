@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard Kunjungan Pasien — Puskesmas Bulusan</title>
+    <meta
+      name="description"
+      content="Dashboard interaktif data kunjungan pasien per poli Puskesmas Bulusan. Menampilkan tren bulanan, distribusi per poli, komposisi pasien baru/lama, dan gender."
+    />
+    <meta name="theme-color" content="#0f766e" />
+
+    <link rel="icon" type="image/png" href="assets/logo.png" />
+    <link rel="apple-touch-icon" href="assets/logo.png" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Tailwind CSS (CDN, tanpa build tool) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      if (window.tailwind) {
+        tailwind.config = {
+          theme: {
+            extend: {
+              fontFamily: {
+                sans: [
+                  '"Plus Jakarta Sans"',
+                  'ui-sans-serif',
+                  'system-ui',
+                  'sans-serif',
+                ],
+              },
+              colors: {
+                brand: {
+                  50: '#f0fdfa',
+                  100: '#ccfbf1',
+                  200: '#99f6e4',
+                  300: '#5eead4',
+                  400: '#2dd4bf',
+                  500: '#14b8a6',
+                  600: '#0d9488',
+                  700: '#0f766e',
+                  800: '#115e59',
+                  900: '#134e4a',
+                },
+              },
+            },
+          },
+        };
+      }
+    </script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+
+    <link rel="stylesheet" href="style.css" />
+  </head>
+
+  <body class="font-sans">
+    <!-- Ikon SVG inline (tanpa dependensi eksternal) -->
+    <svg xmlns="http://www.w3.org/2000/svg" class="svg-sprite" aria-hidden="true">
+      <symbol id="i-plus" viewBox="0 0 24 24">
+        <path d="M12 5v14M5 12h14" />
+      </symbol>
+      <symbol id="i-users" viewBox="0 0 24 24">
+        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+        <circle cx="9" cy="7" r="4" />
+        <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
+      </symbol>
+      <symbol id="i-building" viewBox="0 0 24 24">
+        <path d="M4 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16" />
+        <path d="M16 9h2a2 2 0 0 1 2 2v10M2 21h20M8 7h4M8 11h4M8 15h4M8 21v-2h4v2" />
+      </symbol>
+      <symbol id="i-user-plus" viewBox="0 0 24 24">
+        <path d="M15 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+        <circle cx="8.5" cy="7" r="4" />
+        <path d="M19 8v6M16 11h6" />
+      </symbol>
+      <symbol id="i-gender" viewBox="0 0 24 24">
+        <circle cx="10" cy="14" r="4" />
+        <path d="M10 10V3M7 6l3-3 3 3M18 6v12M15 15l3 3 3-3" />
+      </symbol>
+      <symbol id="i-calendar" viewBox="0 0 24 24">
+        <rect x="3" y="4.5" width="18" height="16" rx="2.5" />
+        <path d="M8 3v3M16 3v3M3 9.5h18" />
+      </symbol>
+      <symbol id="i-filter" viewBox="0 0 24 24">
+        <path d="M3 5h18l-7 8v6l-4 2v-8z" />
+      </symbol>
+      <symbol id="i-refresh" viewBox="0 0 24 24">
+        <path d="M21 12a9 9 0 1 1-2.64-6.36" />
+        <path d="M21 3v6h-6" />
+      </symbol>
+      <symbol id="i-download" viewBox="0 0 24 24">
+        <path d="M12 3v12M7 10l5 5 5-5M4 21h16" />
+      </symbol>
+      <symbol id="i-print" viewBox="0 0 24 24">
+        <path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+        <rect x="6" y="14" width="12" height="7" rx="1" />
+        <path d="M18 12h.01" />
+      </symbol>
+      <symbol id="i-expand" viewBox="0 0 24 24">
+        <path d="M8 3H3v5M16 3h5v5M21 16v5h-5M3 16v5h5" />
+      </symbol>
+      <symbol id="i-shrink" viewBox="0 0 24 24">
+        <path d="M8 3v5H3M16 3v5h5M21 16h-5v5M3 16h5v5" />
+      </symbol>
+      <symbol id="i-login" viewBox="0 0 24 24">
+        <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3" />
+      </symbol>
+      <symbol id="i-logout" viewBox="0 0 24 24">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" />
+      </symbol>
+      <symbol id="i-upload" viewBox="0 0 24 24">
+        <path d="M12 16V3M7 8l5-5 5 5M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" />
+      </symbol>
+      <symbol id="i-file" viewBox="0 0 24 24">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+        <path d="M14 2v6h6M8 13h8M8 17h5" />
+      </symbol>
+      <symbol id="i-edit" viewBox="0 0 24 24">
+        <path d="M12 20h9" />
+        <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z" />
+      </symbol>
+      <symbol id="i-trash" viewBox="0 0 24 24">
+        <path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6M10 11v6M14 11v6" />
+      </symbol>
+      <symbol id="i-check" viewBox="0 0 24 24">
+        <path d="M20 6 9 17l-5-5" />
+      </symbol>
+      <symbol id="i-x" viewBox="0 0 24 24">
+        <path d="M18 6 6 18M6 6l12 12" />
+      </symbol>
+      <symbol id="i-search" viewBox="0 0 24 24">
+        <circle cx="11" cy="11" r="7" />
+        <path d="m20 20-3.5-3.5" />
+      </symbol>
+      <symbol id="i-alert" viewBox="0 0 24 24">
+        <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+        <path d="M12 9v4M12 17h.01" />
+      </symbol>
+      <symbol id="i-info" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="9" />
+        <path d="M12 11v5M12 8h.01" />
+      </symbol>
+      <symbol id="i-arrow-up" viewBox="0 0 24 24">
+        <path d="M12 19V5M6 11l6-6 6 6" />
+      </symbol>
+      <symbol id="i-arrow-down" viewBox="0 0 24 24">
+        <path d="M12 5v14M6 13l6 6 6-6" />
+      </symbol>
+      <symbol id="i-database" viewBox="0 0 24 24">
+        <ellipse cx="12" cy="5" rx="8" ry="3" />
+        <path d="M4 5v7c0 1.66 3.58 3 8 3s8-1.34 8-3V5M4 12v7c0 1.66 3.58 3 8 3s8-1.34 8-3v-7" />
+      </symbol>
+      <symbol id="i-shield" viewBox="0 0 24 24">
+        <path d="M12 22s8-3.5 8-10V5l-8-3-8 3v7c0 6.5 8 10 8 10z" />
+        <path d="m9 12 2 2 4-4" />
+      </symbol>
+      <symbol id="i-clock" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="9" />
+        <path d="M12 7v5l3 2" />
+      </symbol>
+      <symbol id="i-eye" viewBox="0 0 24 24">
+        <path d="M2 12s3.5-6.5 10-6.5S22 12 22 12s-3.5 6.5-10 6.5S2 12 2 12z" />
+        <circle cx="12" cy="12" r="2.5" />
+      </symbol>
+      <symbol id="i-eye-off" viewBox="0 0 24 24">
+        <path d="m3 3 18 18M10.6 6.1A11 11 0 0 1 12 6c6.5 0 10 6 10 6a17 17 0 0 1-3.2 3.9M6.2 7.3A17 17 0 0 0 2 12s3.5 6.5 10 6.5a11 11 0 0 0 4.3-.9" />
+        <path d="M9.9 9.9a2.5 2.5 0 0 0 3.5 3.5" />
+      </symbol>
+      <symbol id="i-image" viewBox="0 0 24 24">
+        <rect x="3" y="3" width="18" height="18" rx="2.5" />
+        <circle cx="8.5" cy="8.5" r="1.5" />
+        <path d="m21 15-5-5L5 21" />
+      </symbol>
+      <symbol id="i-lock" viewBox="0 0 24 24">
+        <rect x="4" y="10" width="16" height="11" rx="2" />
+        <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+      </symbol>
+      <symbol id="i-globe" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="9" />
+        <path d="M3 12h18M12 3c2.5 2.5 3.8 5.7 3.8 9s-1.3 6.5-3.8 9c-2.5-2.5-3.8-5.7-3.8-9S9.5 5.5 12 3z" />
+      </symbol>
+      <symbol id="i-trend" viewBox="0 0 24 24">
+        <path d="m3 17 6-6 4 4 8-8" />
+        <path d="M15 7h6v6" />
+      </symbol>
+      <symbol id="i-chart" viewBox="0 0 24 24">
+        <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" />
+      </symbol>
+      <symbol id="i-chevron-down" viewBox="0 0 24 24">
+        <path d="m6 9 6 6 6-6" />
+      </symbol>
+    </svg>
+
+    <!-- Loading -->
+    <div id="loading-screen" class="loading-screen">
+      <div class="loading-card">
+        <div class="brand-mark brand-mark-logo brand-mark-lg">
+          <img src="assets/logo.png" alt="" width="54" height="54" />
+        </div>
+        <p class="loading-title">Memuat dashboard…</p>
+        <p class="loading-sub">Menghubungkan ke sumber data kunjungan</p>
+        <div class="loading-bar"><span></span></div>
+      </div>
+    </div>
+
+    <div id="app-shell" class="app-shell is-ready">
+      <!-- Banner mode demo / peringatan -->
+      <div id="demo-banner" class="notice-banner hidden">
+        <div class="notice-banner-inner">
+          <span class="notice-icon"><svg class="icon"><use href="#i-info"></use></svg></span>
+          <p id="demo-banner-text">
+            <strong>Mode Demo.</strong> Dashboard menampilkan data contoh yang tersimpan di browser.
+            Isi <code>config.js</code> dengan URL &amp; anon key Supabase untuk menggunakan data produksi.
+          </p>
+        </div>
+        <button id="btn-dismiss-banner" class="notice-close" type="button" aria-label="Tutup pemberitahuan">
+          <svg class="icon"><use href="#i-x"></use></svg>
+        </button>
+      </div>
+
+      <!-- Header -->
+      <header class="site-header">
+        <div class="header-inner">
+          <a class="brand" href="#" aria-label="Dashboard Puskesmas Bulusan">
+            <span class="brand-mark brand-mark-logo">
+              <img src="assets/logo.png" alt="" width="42" height="42" />
+            </span>
+            <span class="brand-copy">
+              <span class="brand-title">Puskesmas Bulusan</span>
+              <span class="brand-subtitle">Dashboard Kunjungan Pasien</span>
+            </span>
+          </a>
+
+          <div class="header-actions">
+            <span id="mode-pill" class="mode-pill">Mode Demo</span>
+            <button id="btn-refresh" class="icon-btn" type="button" title="Muat ulang data" aria-label="Muat ulang data">
+              <svg class="icon"><use href="#i-refresh"></use></svg>
+            </button>
+            <button id="btn-fullscreen" class="icon-btn" type="button" title="Tampilan layar penuh" aria-label="Tampilan layar penuh">
+              <svg class="icon"><use href="#i-expand"></use></svg>
+            </button>
+            <div id="user-menu" class="user-menu hidden">
+              <span class="user-avatar" id="user-avatar">A</span>
+              <span class="user-email" id="user-email">admin</span>
+              <button id="btn-logout" class="icon-btn" type="button" title="Keluar" aria-label="Keluar">
+                <svg class="icon"><use href="#i-logout"></use></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Panel admin -->
+      <section id="admin-bar" class="admin-bar hidden" aria-label="Panel admin">
+        <div class="admin-bar-inner">
+          <div class="admin-identity">
+            <span class="status-dot"></span>
+            <span>Mode Admin</span>
+            <span class="admin-divider"></span>
+            <span id="admin-email" class="admin-email">—</span>
+          </div>
+          <div class="admin-actions">
+            <button id="btn-upload" class="btn btn-primary btn-sm" type="button">
+              <svg class="icon"><use href="#i-upload"></use></svg>
+              Upload SIMPUS
+            </button>
+            <button id="btn-add-row" class="btn btn-soft btn-sm" type="button">
+              <svg class="icon"><use href="#i-plus"></use></svg>
+              Tambah Data
+            </button>
+            <button id="btn-online" class="btn btn-soft btn-sm" type="button">
+              <svg class="icon"><use href="#i-globe"></use></svg>
+              Kunjungan Online
+            </button>
+            <button id="btn-delete-period" class="btn btn-soft btn-sm danger-text" type="button">
+              <svg class="icon"><use href="#i-trash"></use></svg>
+              Hapus Periode
+            </button>
+            <button id="btn-reset-demo" class="btn btn-ghost btn-sm hidden" type="button">
+              <svg class="icon"><use href="#i-refresh"></use></svg>
+              Reset Demo
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <main id="dashboard-root" class="dashboard-main">
+        <div id="print-header" class="print-only">
+          <div>
+            <p class="print-kicker">Kota Semarang</p>
+            <h1>Puskesmas Bulusan</h1>
+            <p>Laporan Rekapitulasi Kunjungan Pasien</p>
+          </div>
+          <div class="print-period">
+            <span>Periode</span>
+            <strong id="print-period-label">—</strong>
+          </div>
+        </div>
+
+        <!-- Judul halaman -->
+        <section class="page-intro">
+          <div class="page-intro-copy">
+            <p class="eyebrow">
+              <span class="live-dot" aria-hidden="true"></span>
+              Data kunjungan bulanan
+            </p>
+            <h1>Ringkasan Kunjungan Pasien</h1>
+            <p id="period-description" class="page-subtitle">
+              Memuat periode…
+            </p>
+          </div>
+          <div class="page-actions">
+            <button id="btn-print" class="btn btn-soft" type="button">
+              <svg class="icon"><use href="#i-print"></use></svg>
+              Cetak / PDF
+            </button>
+            <button id="btn-download-all" class="btn btn-soft" type="button">
+              <svg class="icon"><use href="#i-download"></use></svg>
+              Unduh Grafik
+            </button>
+          </div>
+        </section>
+
+        <!-- Filter -->
+        <section class="filter-card" aria-label="Filter data kunjungan">
+          <div class="filter-head">
+            <span class="filter-title">
+              <svg class="icon"><use href="#i-filter"></use></svg>
+              Filter data
+            </span>
+            <span class="filter-note">Perubahan langsung diterapkan pada seluruh tampilan</span>
+          </div>
+
+          <div class="filter-grid">
+            <label class="field" for="filter-year">
+              <span class="field-label">Tahun</span>
+              <div class="select-wrap">
+                <select id="filter-year"></select>
+                <svg class="icon select-icon"><use href="#i-chevron-down"></use></svg>
+              </div>
+            </label>
+
+            <label class="field" for="filter-month">
+              <span class="field-label">Bulan</span>
+              <div class="select-wrap">
+                <select id="filter-month"></select>
+                <svg class="icon select-icon"><use href="#i-chevron-down"></use></svg>
+              </div>
+            </label>
+
+            <label class="field" for="filter-poli">
+              <span class="field-label">Unit / Poli</span>
+              <div class="select-wrap">
+                <select id="filter-poli"></select>
+                <svg class="icon select-icon"><use href="#i-chevron-down"></use></svg>
+              </div>
+            </label>
+
+            <button id="btn-reset-filter" class="btn btn-ghost filter-reset" type="button">
+              <svg class="icon"><use href="#i-refresh"></use></svg>
+              Reset
+            </button>
+          </div>
+
+          <div id="active-filter" class="active-filter hidden">
+            <span class="active-filter-label">Filter aktif:</span>
+            <span id="active-filter-chip" class="chip">—</span>
+            <button id="btn-clear-poli" class="chip-clear" type="button">
+              Hapus filter poli
+              <svg class="icon"><use href="#i-x"></use></svg>
+            </button>
+          </div>
+        </section>
+
+        <div id="data-alert" class="data-alert hidden" role="status"></div>
+
+        <!-- KPI -->
+        <section class="kpi-grid" aria-label="Indikator utama">
+          <article class="kpi-card kpi-total">
+            <div class="kpi-head">
+              <span class="kpi-icon tone-teal"><svg class="icon"><use href="#i-users"></use></svg></span>
+              <span class="kpi-label">Total Kunjungan</span>
+            </div>
+            <div class="kpi-main">
+              <span id="kpi-total" class="kpi-value">—</span>
+              <span class="kpi-unit">kunjungan</span>
+            </div>
+            <div id="kpi-total-delta" class="kpi-delta is-neutral">Memuat…</div>
+            <p id="kpi-total-sub" class="kpi-sub">—</p>
+          </article>
+
+          <article class="kpi-card kpi-poli">
+            <div class="kpi-head">
+              <span class="kpi-icon tone-indigo"><svg class="icon"><use href="#i-building"></use></svg></span>
+              <span class="kpi-label">Poli Terpadat</span>
+            </div>
+            <div class="kpi-main">
+              <span id="kpi-poli-name" class="kpi-value kpi-value-text">—</span>
+            </div>
+            <div id="kpi-poli-detail" class="kpi-delta is-neutral">—</div>
+            <div class="mini-bar" aria-hidden="true">
+              <span id="kpi-poli-bar" style="width: 0%"></span>
+            </div>
+            <p id="kpi-poli-sub" class="kpi-sub">dari total kunjungan periode</p>
+          </article>
+
+          <article class="kpi-card kpi-detail">
+            <div class="kpi-head">
+              <span class="kpi-icon tone-amber"><svg class="icon"><use href="#i-user-plus"></use></svg></span>
+              <span class="kpi-label">Pasien Baru vs Lama</span>
+            </div>
+            <div class="kpi-main">
+              <span id="kpi-new-ratio" class="kpi-value">—</span>
+              <span class="kpi-unit">baru : lama</span>
+            </div>
+            <div class="split-bar" aria-hidden="true">
+              <span id="kpi-new-bar" class="split-new" style="width: 0%"></span>
+              <span id="kpi-lama-bar" class="split-lama" style="width: 0%"></span>
+            </div>
+            <div class="kpi-duo">
+              <span><i class="dot dot-teal"></i>Baru <strong id="kpi-baru">0</strong> <em id="kpi-baru-pct">0%</em></span>
+              <span><i class="dot dot-amber"></i>Lama <strong id="kpi-lama">0</strong> <em id="kpi-lama-pct">0%</em></span>
+            </div>
+          </article>
+
+          <article class="kpi-card kpi-detail">
+            <div class="kpi-head">
+              <span class="kpi-icon tone-rose"><svg class="icon"><use href="#i-gender"></use></svg></span>
+              <span class="kpi-label">Proporsi Gender</span>
+            </div>
+            <div class="kpi-main">
+              <span id="kpi-gender-ratio" class="kpi-value">—</span>
+              <span class="kpi-unit">L : P</span>
+            </div>
+            <div class="split-bar" aria-hidden="true">
+              <span id="kpi-male-bar" class="split-male" style="width: 0%"></span>
+              <span id="kpi-female-bar" class="split-female" style="width: 0%"></span>
+            </div>
+            <div class="kpi-duo">
+              <span><i class="dot dot-blue"></i>Laki-laki <strong id="kpi-male">0</strong> <em id="kpi-male-pct">0%</em></span>
+              <span><i class="dot dot-pink"></i>Perempuan <strong id="kpi-female">0</strong> <em id="kpi-female-pct">0%</em></span>
+            </div>
+          </article>
+        </section>
+
+        <!-- Grafik tren + komposisi -->
+        <section class="chart-grid">
+          <article class="card chart-card chart-card-trend">
+            <header class="card-head">
+              <div>
+                <h2 class="card-title">Tren Kunjungan Bulanan</h2>
+                <p id="trend-subtitle" class="card-subtitle">Januari — Desember</p>
+              </div>
+              <div class="card-actions">
+                <span class="chart-legend-note">Bar = baru/lama · Garis = total</span>
+                <button
+                  id="btn-dl-trend"
+                  class="icon-btn"
+                  type="button"
+                  title="Unduh grafik tren (PNG)"
+                  aria-label="Unduh grafik tren"
+                >
+                  <svg class="icon"><use href="#i-image"></use></svg>
+                </button>
+              </div>
+            </header>
+            <div class="chart-box chart-box-lg">
+              <canvas id="chart-trend" aria-label="Grafik tren kunjungan bulanan" role="img"></canvas>
+            </div>
+            <div id="trend-foot" class="chart-foot"></div>
+          </article>
+
+          <article class="card chart-card">
+            <header class="card-head">
+              <div>
+                <h2 class="card-title">Komposisi Kunjungan</h2>
+                <p class="card-subtitle">Status pasien &amp; jenis kelamin</p>
+              </div>
+              <button
+                id="btn-dl-composition"
+                class="icon-btn"
+                type="button"
+                title="Unduh grafik komposisi (PNG)"
+                aria-label="Unduh grafik komposisi"
+              >
+                <svg class="icon"><use href="#i-image"></use></svg>
+              </button>
+            </header>
+
+            <div class="composition-grid">
+              <div class="donut-block">
+                <div class="donut-wrap">
+                  <div class="chart-box chart-box-donut">
+                    <canvas id="chart-status" aria-label="Grafik pasien baru versus lama" role="img"></canvas>
+                    <div class="donut-center">
+                      <strong id="donut-status-total">0</strong>
+                      <span>kunjungan</span>
+                    </div>
+                  </div>
+                </div>
+                <p class="donut-title">Status Pasien</p>
+                <div id="legend-status" class="donut-legend"></div>
+              </div>
+
+              <div class="donut-block">
+                <div class="donut-wrap">
+                  <div class="chart-box chart-box-donut">
+                    <canvas id="chart-gender" aria-label="Grafik proporsi jenis kelamin" role="img"></canvas>
+                    <div class="donut-center">
+                      <strong id="donut-gender-total">0</strong>
+                      <span>kunjungan</span>
+                    </div>
+                  </div>
+                </div>
+                <p class="donut-title">Jenis Kelamin</p>
+                <div id="legend-gender" class="donut-legend"></div>
+              </div>
+            </div>
+          </article>
+        </section>
+
+        <!-- Kunjungan online vs datang langsung -->
+        <section class="card chart-card chart-card-online">
+          <header class="card-head">
+            <div>
+              <h2 class="card-title">Kunjungan Online vs Datang Langsung</h2>
+              <p id="online-chart-subtitle" class="card-subtitle">Perbandingan per bulan</p>
+            </div>
+            <div class="card-actions">
+              <span class="chart-legend-note">Bar = sumber kunjungan</span>
+              <button
+                id="btn-dl-online"
+                class="icon-btn"
+                type="button"
+                title="Unduh grafik online vs langsung (PNG)"
+                aria-label="Unduh grafik online vs datang langsung"
+              >
+                <svg class="icon"><use href="#i-image"></use></svg>
+              </button>
+            </div>
+          </header>
+          <div class="chart-box chart-box-online">
+            <canvas
+              id="chart-online"
+              aria-label="Grafik kunjungan online versus datang langsung per bulan"
+              role="img"
+            ></canvas>
+          </div>
+          <div id="online-foot" class="chart-foot"></div>
+          <p class="chart-hint">
+            <svg class="icon"><use href="#i-info"></use></svg>
+            Datang langsung = total kunjungan bulan tersebut dikurangi kunjungan online. Data online dicatat sebagai total puskesmas, bukan per poli.
+          </p>
+        </section>
+
+        <!-- Distribusi poli -->
+        <section class="card chart-card">
+          <header class="card-head">
+            <div>
+              <h2 class="card-title">Distribusi Kunjungan per Poli</h2>
+              <p id="poli-chart-subtitle" class="card-subtitle">Diurutkan dari poli dengan kunjungan tertinggi</p>
+            </div>
+            <div class="card-actions">
+              <button id="btn-dl-poli" class="icon-btn" type="button" title="Unduh grafik per poli (PNG)" aria-label="Unduh grafik per poli">
+                <svg class="icon"><use href="#i-image"></use></svg>
+              </button>
+            </div>
+          </header>
+          <div class="chart-box chart-box-poli">
+            <canvas id="chart-poli" aria-label="Grafik distribusi kunjungan per poli" role="img"></canvas>
+          </div>
+          <p class="chart-hint">
+            <svg class="icon"><use href="#i-info"></use></svg>
+            Klik salah satu batang untuk memfilter seluruh dashboard pada poli tersebut.
+          </p>
+        </section>
+
+        <!-- Tabel rekap -->
+        <section class="card table-card">
+          <header class="table-toolbar">
+            <div>
+              <div class="table-title-row">
+                <h2 class="card-title">Rekapitulasi Kunjungan per Poli</h2>
+                <span id="table-online-chip" class="online-chip hidden"></span>
+              </div>
+              <p id="table-subtitle" class="card-subtitle">—</p>
+            </div>
+            <label class="table-search" for="table-search">
+              <svg class="icon"><use href="#i-search"></use></svg>
+              <input id="table-search" type="search" placeholder="Cari poli…" autocomplete="off" />
+            </label>
+          </header>
+
+          <div class="table-wrap">
+            <table class="data-table" id="data-table">
+              <thead>
+                <tr>
+                  <th class="sticky-col col-poli" scope="col">Poli / Unit Layanan</th>
+                  <th class="num" scope="col">Baru L</th>
+                  <th class="num" scope="col">Baru P</th>
+                  <th class="num" scope="col">Lama L</th>
+                  <th class="num" scope="col">Lama P</th>
+                  <th class="num" scope="col">Jumlah L</th>
+                  <th class="num" scope="col">Jumlah P</th>
+                  <th class="num num-total" scope="col">Total</th>
+                  <th class="col-share" scope="col">Proporsi</th>
+                  <th class="col-status" scope="col">Status</th>
+                  <th id="th-actions" class="col-actions admin-only" scope="col">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="table-body"></tbody>
+              <tfoot id="table-foot"></tfoot>
+            </table>
+          </div>
+
+          <div id="table-empty" class="empty-state hidden">
+            <svg class="icon"><use href="#i-database"></use></svg>
+            <p>Belum ada data pada periode ini.</p>
+            <button id="btn-empty-action" class="btn btn-soft btn-sm hidden" type="button">
+              Upload data SIMPUS
+            </button>
+          </div>
+        </section>
+
+        <footer class="site-footer">
+          <div>
+            <p class="footer-title">Puskesmas Bulusan</p>
+            <p class="footer-text">Sumber data: Sistem Informasi Manajemen Puskesmas (SIMPUS).</p>
+          </div>
+          <div class="footer-meta">
+            <span id="last-updated">—</span>
+            <span id="footer-source" class="footer-badge">Mode Demo</span>
+          </div>
+        </footer>
+      </main>
+    </div>
+
+    <!-- ================= MODAL UPLOAD ================= -->
+    <div id="upload-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="upload-title">
+      <div class="modal-backdrop" data-close-modal="upload-modal"></div>
+      <div class="modal-panel modal-panel-lg">
+        <header class="modal-head">
+          <div class="modal-title-group">
+            <span class="modal-icon"><svg class="icon"><use href="#i-upload"></use></svg></span>
+            <div>
+              <h2 id="upload-title" class="modal-title">Upload Data SIMPUS</h2>
+              <p class="modal-subtitle">Parser berjalan di browser — periksa preview sebelum menyimpan</p>
+            </div>
+          </div>
+          <button class="icon-btn" type="button" data-close-modal="upload-modal" aria-label="Tutup">
+            <svg class="icon"><use href="#i-x"></use></svg>
+          </button>
+        </header>
+
+        <div class="modal-body">
+          <div id="dropzone" class="dropzone" tabindex="0" role="button" aria-label="Pilih file SIMPUS">
+            <input id="file-input" type="file" accept=".xls,.html,.htm,.csv,.xlsx,.txt" hidden />
+            <span class="dropzone-icon"><svg class="icon"><use href="#i-file"></use></svg></span>
+            <p class="dropzone-title">Seret file SIMPUS ke sini</p>
+            <p class="dropzone-sub">atau klik area ini untuk memilih file</p>
+            <p class="dropzone-hint">Mendukung .xls (HTML SIMPUS), .csv, .xlsx · maksimal 15 MB</p>
+            <button id="btn-browse" class="btn btn-soft btn-sm" type="button">Pilih File</button>
+          </div>
+
+          <div id="upload-progress" class="upload-progress hidden">
+            <span class="spinner"></span>
+            <span>Membaca &amp; mem-parsing file…</span>
+          </div>
+
+          <div id="upload-error" class="form-error hidden" role="alert"></div>
+
+          <div id="upload-preview" class="upload-preview hidden">
+            <div class="upload-preview-head">
+              <h3>Preview data</h3>
+              <button id="btn-upload-replace" class="btn btn-ghost btn-sm" type="button">
+                <svg class="icon"><use href="#i-refresh"></use></svg>
+                Ganti file
+              </button>
+            </div>
+
+            <div class="upload-summary">
+              <div>
+                <span>File</span>
+                <strong id="upload-file-name">—</strong>
+              </div>
+              <div>
+                <span>Periode terdeteksi</span>
+                <strong id="upload-period-detected">—</strong>
+              </div>
+              <div>
+                <span>Baris poli</span>
+                <strong id="upload-row-count">0</strong>
+              </div>
+            </div>
+
+            <div class="period-editor">
+              <label class="field" for="upload-month">
+                <span class="field-label">Bulan</span>
+                <div class="select-wrap">
+                  <select id="upload-month"></select>
+                  <svg class="icon select-icon"><use href="#i-chevron-down"></use></svg>
+                </div>
+              </label>
+              <label class="field" for="upload-year">
+                <span class="field-label">Tahun</span>
+                <input id="upload-year" type="number" min="2000" max="2100" inputmode="numeric" />
+              </label>
+            </div>
+
+            <div id="upload-conflict" class="inline-alert hidden"></div>
+            <div id="upload-warnings" class="warning-list hidden"></div>
+
+            <div class="preview-table-wrap">
+              <table class="preview-table">
+                <thead>
+                  <tr>
+                    <th>Poli</th>
+                    <th class="num">Baru L</th>
+                    <th class="num">Baru P</th>
+                    <th class="num">Lama L</th>
+                    <th class="num">Lama P</th>
+                    <th class="num">Jumlah L</th>
+                    <th class="num">Jumlah P</th>
+                    <th class="num">Total</th>
+                  </tr>
+                </thead>
+                <tbody id="upload-preview-body"></tbody>
+              </table>
+            </div>
+            <p id="upload-preview-note" class="preview-note"></p>
+          </div>
+        </div>
+
+        <footer class="modal-foot">
+          <button class="btn btn-ghost" type="button" data-close-modal="upload-modal">Batal</button>
+          <button id="btn-upload-save" class="btn btn-primary" type="button" disabled>
+            <svg class="icon"><use href="#i-check"></use></svg>
+            Simpan Data
+          </button>
+        </footer>
+      </div>
+    </div>
+
+    <!-- ================= MODAL TAMBAH / EDIT ================= -->
+    <div id="data-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="data-title">
+      <div class="modal-backdrop" data-close-modal="data-modal"></div>
+      <div class="modal-panel modal-panel-md">
+        <header class="modal-head">
+          <div class="modal-title-group">
+            <span class="modal-icon"><svg class="icon"><use href="#i-edit"></use></svg></span>
+            <div>
+              <h2 id="data-title" class="modal-title">Tambah Data Kunjungan</h2>
+              <p id="data-subtitle" class="modal-subtitle">Input manual angka kunjungan per poli</p>
+            </div>
+          </div>
+          <button class="icon-btn" type="button" data-close-modal="data-modal" aria-label="Tutup">
+            <svg class="icon"><use href="#i-x"></use></svg>
+          </button>
+        </header>
+
+        <form id="data-form" class="modal-body" novalidate>
+          <div id="data-error" class="form-error hidden" role="alert"></div>
+
+          <div class="form-grid">
+            <label class="field" for="data-year">
+              <span class="field-label">Tahun</span>
+              <input id="data-year" type="number" min="2000" max="2100" inputmode="numeric" required />
+            </label>
+            <label class="field" for="data-month">
+              <span class="field-label">Bulan</span>
+              <div class="select-wrap">
+                <select id="data-month" required></select>
+                <svg class="icon select-icon"><use href="#i-chevron-down"></use></svg>
+              </div>
+            </label>
+          </div>
+
+          <label class="field" for="data-poli">
+            <span class="field-label">Nama Poli / Unit Layanan</span>
+            <input id="data-poli" type="text" list="poli-options" placeholder="Contoh: Poli Umum" required />
+            <datalist id="poli-options"></datalist>
+          </label>
+
+          <div class="number-grid">
+            <label class="field" for="data-baru-l">
+              <span class="field-label">Baru — Laki-laki</span>
+              <input id="data-baru-l" type="number" min="0" step="1" value="0" inputmode="numeric" />
+            </label>
+            <label class="field" for="data-baru-p">
+              <span class="field-label">Baru — Perempuan</span>
+              <input id="data-baru-p" type="number" min="0" step="1" value="0" inputmode="numeric" />
+            </label>
+            <label class="field" for="data-lama-l">
+              <span class="field-label">Lama — Laki-laki</span>
+              <input id="data-lama-l" type="number" min="0" step="1" value="0" inputmode="numeric" />
+            </label>
+            <label class="field" for="data-lama-p">
+              <span class="field-label">Lama — Perempuan</span>
+              <input id="data-lama-p" type="number" min="0" step="1" value="0" inputmode="numeric" />
+            </label>
+            <label class="field" for="data-jumlah-l">
+              <span class="field-label">Jumlah — Laki-laki</span>
+              <input id="data-jumlah-l" type="number" min="0" step="1" value="0" inputmode="numeric" />
+            </label>
+            <label class="field" for="data-jumlah-p">
+              <span class="field-label">Jumlah — Perempuan</span>
+              <input id="data-jumlah-p" type="number" min="0" step="1" value="0" inputmode="numeric" />
+            </label>
+          </div>
+
+          <div class="total-preview">
+            <span>Total kunjungan</span>
+            <strong id="data-total-preview">0</strong>
+          </div>
+        </form>
+
+        <footer class="modal-foot">
+          <button class="btn btn-ghost" type="button" data-close-modal="data-modal">Batal</button>
+          <button id="btn-data-save" class="btn btn-primary" type="submit" form="data-form">
+            <svg class="icon"><use href="#i-check"></use></svg>
+            Simpan
+          </button>
+        </footer>
+      </div>
+    </div>
+
+    <!-- ================= MODAL KUNJUNGAN ONLINE ================= -->
+    <div id="online-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="online-title">
+      <div class="modal-backdrop" data-close-modal="online-modal"></div>
+      <div class="modal-panel modal-panel-sm">
+        <header class="modal-head">
+          <div class="modal-title-group">
+            <span class="modal-icon"><svg class="icon"><use href="#i-globe"></use></svg></span>
+            <div>
+              <h2 id="online-title" class="modal-title">Kunjungan Online</h2>
+              <p class="modal-subtitle">Satu total per bulan, bukan per poli</p>
+            </div>
+          </div>
+          <button class="icon-btn" type="button" data-close-modal="online-modal" aria-label="Tutup">
+            <svg class="icon"><use href="#i-x"></use></svg>
+          </button>
+        </header>
+
+        <form id="online-form" class="modal-body" novalidate>
+          <div id="online-error" class="form-error hidden" role="alert"></div>
+
+          <div class="form-grid">
+            <label class="field" for="online-year">
+              <span class="field-label">Tahun</span>
+              <input id="online-year" type="number" min="2000" max="2100" inputmode="numeric" required />
+            </label>
+            <label class="field" for="online-month">
+              <span class="field-label">Bulan</span>
+              <div class="select-wrap">
+                <select id="online-month" required></select>
+                <svg class="icon select-icon"><use href="#i-chevron-down"></use></svg>
+              </div>
+            </label>
+          </div>
+
+          <label class="field" for="online-jumlah">
+            <span class="field-label">Total Kunjungan Online</span>
+            <input id="online-jumlah" type="number" min="0" step="1" value="0" inputmode="numeric" />
+            <span class="field-note">
+              Jumlah seluruh kunjungan yang didaftarkan melalui kanal online pada bulan tersebut.
+            </span>
+          </label>
+
+          <div class="online-reference">
+            <div>
+              <span>Total kunjungan periode</span>
+              <strong id="online-visit-total">0</strong>
+            </div>
+            <p id="online-note" class="field-note">—</p>
+          </div>
+        </form>
+
+        <footer class="modal-foot online-foot">
+          <button id="btn-online-delete" class="btn btn-ghost danger-text hidden" type="button">
+            <svg class="icon"><use href="#i-trash"></use></svg>
+            Hapus Online
+          </button>
+          <div class="online-foot-actions">
+            <button class="btn btn-ghost" type="button" data-close-modal="online-modal">Batal</button>
+            <button id="btn-online-save" class="btn btn-primary" type="submit" form="online-form">
+              <svg class="icon"><use href="#i-check"></use></svg>
+              Simpan
+            </button>
+          </div>
+        </footer>
+      </div>
+    </div>
+
+    <!-- ================= MODAL KONFIRMASI ================= -->
+    <div id="confirm-modal" class="modal confirm-modal" role="alertdialog" aria-modal="true" aria-labelledby="confirm-title">
+      <div class="modal-backdrop" data-close-modal="confirm-modal"></div>
+      <div class="modal-panel modal-panel-xs">
+        <div class="confirm-body">
+          <span id="confirm-icon" class="confirm-icon">
+            <svg class="icon"><use href="#i-alert"></use></svg>
+          </span>
+          <h2 id="confirm-title" class="confirm-title">Konfirmasi</h2>
+          <p id="confirm-message" class="confirm-message">—</p>
+        </div>
+        <footer class="modal-foot modal-foot-center">
+          <button id="btn-confirm-cancel" class="btn btn-ghost" type="button">Batal</button>
+          <button id="btn-confirm-ok" class="btn btn-danger" type="button">Hapus</button>
+        </footer>
+      </div>
+    </div>
+
+    <div id="toast-stack" class="toast-stack" aria-live="polite" aria-atomic="false"></div>
+
+    <noscript>
+      <div class="noscript">Dashboard ini memerlukan JavaScript. Silakan aktifkan JavaScript di browser Anda.</div>
+    </noscript>
+
+    <script type="module" src="app.js"></script>
+  </body>
+</html>

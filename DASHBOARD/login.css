@@ -1,0 +1,241 @@
+/* ==========================================================================
+   Halaman login admin — Dashboard Kunjungan Pasien Puskesmas Bulusan
+   Memakai token & komponen dasar dari style.css.
+   ========================================================================== */
+
+.auth-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.auth-shell {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: center;
+  gap: 16px;
+  width: 100%;
+  max-width: 452px;
+  margin: 0 auto;
+  padding: 42px 20px 30px;
+}
+
+.auth-card {
+  position: relative;
+  overflow: hidden;
+  padding: 32px 32px 26px;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  border-radius: 24px;
+  background: #fff;
+  box-shadow: 0 30px 60px -30px rgba(15, 23, 42, 0.28),
+    0 2px 6px rgba(15, 23, 42, 0.04);
+}
+
+.auth-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 4px;
+  background: linear-gradient(90deg, #14b8a6, #0f766e 60%, #115e59);
+}
+
+.auth-head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.auth-brand {
+  justify-content: center;
+  gap: 13px;
+}
+
+.auth-brand .brand-mark-lg {
+  margin: 0;
+}
+
+.auth-brand .brand-title {
+  max-width: none;
+  font-size: 16px;
+  white-space: nowrap;
+}
+
+.auth-brand .brand-subtitle {
+  font-size: 12px;
+}
+
+.auth-intro {
+  margin-top: 26px;
+}
+
+.auth-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 11px;
+  border: 1px solid var(--brand-100);
+  border-radius: 999px;
+  background: var(--brand-50);
+  color: var(--brand-800);
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.075em;
+  text-transform: uppercase;
+}
+
+.auth-badge .icon {
+  width: 14px;
+  height: 14px;
+  stroke-width: 2.1;
+}
+
+.auth-title {
+  margin: 13px 0 0;
+  color: var(--ink);
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1.15;
+}
+
+.auth-subtitle {
+  max-width: 320px;
+  margin: 7px auto 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.auth-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  margin-top: 20px;
+  padding: 10px 12px;
+  border: 1px dashed var(--line);
+  border-radius: 11px;
+  background: #f8fafc;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.auth-status .spinner {
+  width: 15px;
+  height: 15px;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 22px;
+}
+
+.auth-form .btn-block {
+  height: 44px;
+  margin-top: 2px;
+}
+
+.auth-card.is-booting .auth-form {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.auth-foot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-top: 24px;
+  padding-top: 18px;
+  border-top: 1px dashed var(--line-soft);
+  text-align: center;
+}
+
+.auth-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--brand-700);
+  font-size: 12.5px;
+  font-weight: 700;
+  transition: color 0.15s ease, gap 0.15s ease;
+}
+
+.auth-back:hover {
+  gap: 9px;
+  color: var(--brand-900);
+}
+
+.auth-back .icon {
+  width: 15px;
+  height: 15px;
+  stroke-width: 2.2;
+}
+
+.auth-note {
+  max-width: 330px;
+  margin: 0;
+  color: var(--muted-light);
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.auth-copy {
+  margin: 0;
+  color: var(--muted-light);
+  font-size: 11.5px;
+  text-align: center;
+}
+
+.auth-page a:focus-visible,
+.auth-page button:focus-visible,
+.auth-page input:focus-visible {
+  outline: 2px solid var(--brand-500);
+  outline-offset: 2px;
+}
+
+@media (max-width: 430px) {
+  .auth-shell {
+    padding: 24px 14px 22px;
+  }
+
+  .auth-card {
+    padding: 26px 19px 22px;
+    border-radius: 20px;
+  }
+
+  .auth-brand .brand-title {
+    font-size: 14.5px;
+  }
+
+  .auth-brand .brand-subtitle {
+    font-size: 11.5px;
+  }
+
+  .auth-intro {
+    margin-top: 22px;
+  }
+
+  .auth-title {
+    font-size: 23px;
+  }
+
+  .auth-subtitle {
+    font-size: 12.5px;
+  }
+}
+
+@media print {
+  .auth-page {
+    background: #fff;
+  }
+
+  .auth-card {
+    box-shadow: none;
+  }
+}

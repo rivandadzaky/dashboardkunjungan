@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login Admin — Dashboard Puskesmas Bulusan</title>
+    <meta
+      name="description"
+      content="Halaman login administrator Dashboard Kunjungan Pasien Puskesmas Bulusan."
+    />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="theme-color" content="#0f766e" />
+
+    <link rel="icon" type="image/png" href="assets/logo.png" />
+    <link rel="apple-touch-icon" href="assets/logo.png" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="login.css" />
+  </head>
+
+  <body class="auth-page">
+    <!-- Ikon SVG inline (tanpa dependensi eksternal) -->
+    <svg xmlns="http://www.w3.org/2000/svg" class="svg-sprite" aria-hidden="true">
+      <symbol id="i-plus" viewBox="0 0 24 24">
+        <path d="M12 5v14M5 12h14" />
+      </symbol>
+      <symbol id="i-shield" viewBox="0 0 24 24">
+        <path d="M12 22s8-3.5 8-10V5l-8-3-8 3v7c0 6.5 8 10 8 10z" />
+        <path d="m9 12 2 2 4-4" />
+      </symbol>
+      <symbol id="i-login" viewBox="0 0 24 24">
+        <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3" />
+      </symbol>
+      <symbol id="i-eye" viewBox="0 0 24 24">
+        <path d="M2 12s3.5-6.5 10-6.5S22 12 22 12s-3.5 6.5-10 6.5S2 12 2 12z" />
+        <circle cx="12" cy="12" r="2.5" />
+      </symbol>
+      <symbol id="i-eye-off" viewBox="0 0 24 24">
+        <path d="m3 3 18 18M10.6 6.1A11 11 0 0 1 12 6c6.5 0 10 6 10 6a17 17 0 0 1-3.2 3.9M6.2 7.3A17 17 0 0 0 2 12s3.5 6.5 10 6.5a11 11 0 0 0 4.3-.9" />
+        <path d="M9.9 9.9a2.5 2.5 0 0 0 3.5 3.5" />
+      </symbol>
+      <symbol id="i-arrow-left" viewBox="0 0 24 24">
+        <path d="M19 12H5M12 19l-7-7 7-7" />
+      </symbol>
+      <symbol id="i-alert" viewBox="0 0 24 24">
+        <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+        <path d="M12 9v4M12 17h.01" />
+      </symbol>
+    </svg>
+
+    <main class="auth-shell">
+      <section class="auth-card is-booting" aria-labelledby="login-title">
+        <header class="auth-head">
+          <div class="brand auth-brand">
+            <span class="brand-mark brand-mark-logo brand-mark-lg">
+              <img src="assets/logo.png" alt="" width="54" height="54" />
+            </span>
+            <span class="brand-copy">
+              <span class="brand-title">Puskesmas Bulusan</span>
+              <span class="brand-subtitle">Dashboard Kunjungan Pasien</span>
+            </span>
+          </div>
+
+          <div class="auth-intro">
+            <span class="auth-badge">
+              <svg class="icon"><use href="#i-shield"></use></svg>
+              Area Admin
+            </span>
+            <h1 id="login-title" class="auth-title">Login Admin</h1>
+            <p class="auth-subtitle">
+              Masuk untuk mengelola data kunjungan Puskesmas Bulusan.
+            </p>
+          </div>
+        </header>
+
+        <div id="auth-status" class="auth-status" role="status" aria-live="polite">
+          <span class="spinner"></span>
+          <span>Memeriksa sesi…</span>
+        </div>
+
+        <form id="login-form" class="auth-form" novalidate>
+          <div id="login-error" class="form-error hidden" role="alert"></div>
+
+          <label class="field" for="login-email">
+            <span class="field-label">Email</span>
+            <input
+              id="login-email"
+              type="email"
+              autocomplete="username"
+              placeholder="nama@puskesmas.go.id"
+              required
+            />
+          </label>
+
+          <label class="field" for="login-password">
+            <span class="field-label">Kata Sandi</span>
+            <span class="password-wrap">
+              <input
+                id="login-password"
+                type="password"
+                autocomplete="current-password"
+                placeholder="••••••••"
+                required
+              />
+              <button
+                id="btn-toggle-password"
+                class="password-toggle"
+                type="button"
+                aria-label="Tampilkan kata sandi"
+              >
+                <svg class="icon"><use href="#i-eye"></use></svg>
+              </button>
+            </span>
+          </label>
+
+          <button id="btn-login-submit" class="btn btn-primary btn-block" type="submit">
+            <svg class="icon"><use href="#i-login"></use></svg>
+            Masuk
+          </button>
+
+          <div id="demo-hint" class="demo-hint hidden">
+            <p>
+              <strong>Mode demo aktif.</strong> Gunakan akun contoh untuk mencoba fitur admin.
+            </p>
+            <code>admin@demo.local · demo123</code>
+            <button id="btn-fill-demo" class="btn btn-soft btn-sm" type="button">
+              Isi otomatis
+            </button>
+          </div>
+        </form>
+
+        <footer class="auth-foot">
+          <a class="auth-back" href="index.html">
+            <svg class="icon"><use href="#i-arrow-left"></use></svg>
+            Kembali ke dashboard
+          </a>
+          <p class="auth-note">
+            Halaman ini hanya untuk administrator. Pengunjung dapat langsung membuka dashboard
+            tanpa login.
+          </p>
+        </footer>
+      </section>
+
+      <p class="auth-copy">
+        &copy; <span id="auth-year">2026</span> Puskesmas Bulusan
+      </p>
+    </main>
+
+    <noscript>
+      <div class="noscript">
+        JavaScript dinonaktifkan. Aktifkan JavaScript untuk dapat login sebagai admin.
+      </div>
+    </noscript>
+
+    <script type="module" src="login.js"></script>
+  </body>
+</html>
